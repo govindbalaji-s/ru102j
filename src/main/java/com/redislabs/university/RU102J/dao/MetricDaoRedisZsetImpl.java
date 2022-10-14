@@ -5,7 +5,6 @@ import com.redislabs.university.RU102J.api.MeterReading;
 import com.redislabs.university.RU102J.api.MetricUnit;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Tuple;
 
 import java.text.DecimalFormat;
@@ -22,10 +21,10 @@ import java.util.*;
  *
  */
 public class MetricDaoRedisZsetImpl implements MetricDao {
-    static private final Integer MAX_METRIC_RETENTION_DAYS = 30;
-    static private final Integer MAX_DAYS_TO_RETURN = 7;
-    static private final Integer METRICS_PER_DAY = 60 * 24;
-    static private final Integer METRIC_EXPIRATION_SECONDS =
+    private static final Integer MAX_METRIC_RETENTION_DAYS = 30;
+    private static final Integer MAX_DAYS_TO_RETURN = 7;
+    private static final Integer METRICS_PER_DAY = 60 * 24;
+    private static final Integer METRIC_EXPIRATION_SECONDS =
             60 * 60 * 24 * MAX_METRIC_RETENTION_DAYS + 1;
     private final JedisPool jedisPool;
 
@@ -51,6 +50,7 @@ public class MetricDaoRedisZsetImpl implements MetricDao {
         // START Challenge #2
         String metricKey = RedisSchema.getDayMetricKey(siteId, unit, dateTime);
         Integer minuteOfDay = getMinuteOfDay(dateTime);
+        jedis.zadd(metricKey, minuteOfDay, value + ":" + minuteOfDay);
         // END Challenge #2
     }
 
